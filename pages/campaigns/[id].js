@@ -7,4 +7,13 @@ const Campaign = () => {
   return <p>Campaign: {id}</p>
 }
 
+export async function getServerSideProps({ params }) {
+  console.log({
+    params
+  })
+  return {
+    props: params
+  }
+}
+
 export default Campaign
