@@ -30,7 +30,6 @@ const RequestNew = ({ address }) => {
   
   const onSubmit = async (event) => {
     event.preventDefault();
-
     const campaign = Campaign(address);
     const { description, value, recipient } = state;
 
@@ -38,16 +37,13 @@ const RequestNew = ({ address }) => {
 
     try {
       const accounts = await web3.eth.getAccounts();
-      debugger
+
       await campaign.methods
         .createRequest(description, web3.utils.toWei(value, "ether"), recipient)
         .send({ from: accounts[0] });
       setState({ ...state, loading: false });
-      router.push(`/campaigns/${address}/requests`)
+      router.push(`/campaigns/${address}`)
     } catch (err) {
-      console.log({
-        ssss: err.message
-      })
       setState({ errorMessage: err.message, loading: false });
     } 
   };
@@ -76,7 +72,7 @@ const RequestNew = ({ address }) => {
           />
         </Form.Field>
         <Form.Field>
-          <label>Recipient</label>
+          <label>Recipient (Address)</label>
           <Input
             value={state.recipient}
             onChange={(event) =>

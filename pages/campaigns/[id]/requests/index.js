@@ -1,13 +1,20 @@
-import React from "react";
+import React, { Component } from "react";
 import { Button, Table } from "semantic-ui-react";
 import Link from "next/link";
 import Layout from "../../../../components/Layout";
 import Campaign from "../../../../ethereum/campaign";
 import RequestRow from "../../../../components/RequestRow";
-
 const { Header, Row, HeaderCell, Body } = Table;
 
-const RequestPage = ({ id, requests, approversCount, requestCount }) => {
+const RequestIndex = ({
+  requests = [],
+  address,
+  approversCount,
+  requestCount,
+}) => {
+  console.log({
+    requests,
+  });
   const renderRows = () => {
     return requests.map((request, index) => {
       return (
@@ -15,16 +22,17 @@ const RequestPage = ({ id, requests, approversCount, requestCount }) => {
           key={index}
           id={index}
           request={request}
-          address={id}
+          address={address}
           approversCount={approversCount}
         />
       );
     });
   };
+
   return (
     <Layout>
       <h3>Requests</h3>
-      <Link href={`/campaigns/${id}/requests/new`}>
+      <Link href={`/campaigns/${address}/requests/new`}>
         <a>
           <Button primary floated="right" style={{ marginBottom: 10 }}>
             Add Request
@@ -55,6 +63,7 @@ export async function getServerSideProps({ params }) {
   const campaign = Campaign(id);
   const requestCount = await campaign.methods.getRequestsCount().call();
   const approversCount = await campaign.methods.approversCount().call();
+
   const requests = await Promise.all(
     Array(parseInt(requestCount))
       .fill()
@@ -63,9 +72,22 @@ export async function getServerSideProps({ params }) {
       })
   );
 
+  const serializeData = requests.map((item) => ({
+    description: item[0],
+    value: item[1],
+    recipient: item[2],
+    complete: item[3],
+    approvalCount: item[4],
+  }));
+
   return {
-    props: { id, requests, requestCount, approversCount },
+    props: {
+      address: id,
+      requests: serializeData,
+      requestCount,
+      approversCount,
+    },
   };
 }
 
-export default RequestPage;
+export default RequestIndex;
