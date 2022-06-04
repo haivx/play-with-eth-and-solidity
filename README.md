@@ -1,34 +1,38 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+*I.* NOte: Cần phân biệt web3 provider và web3js:
+- web3 provider đang muốn nói đến những provider đóng vai trò là cầu nối giữa UI(ví dụ web) với mạng blockchain: ví metamask hoặc các Ethereum provider khác(ví dụ truffle/hdwallet-provider)
+- web3js là một thư viện đóng vai trò làm provider. thư viện này sẽ kết nối với mạng blockchain thông qua HTTP/IPC/Websocket:
+   - Nếu cần tương tác với web3js qua UI, thường ở web sẽ dùng ví điện tử metamask: Dùng khi người dùng muốn tương tác với blockchain
+   - còn lại, có thể dùng web3js kết nối trực tiếp với blockchain qua http provider, hoặc mấy phương thức còn lại(IPC/Websocket): Hay dùng khi deploy smartcontract...
 
-## Getting Started
+B1: Viết contract
 
-First, run the development server:
+B2: Compile contract sang dạng bytecode(ABI, interface....)
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+B3: Deploy bytecode lên mạng blockchain
+- Khởi tạo web3 provider thông qua web3js:
+  - tạo web3 provider thông qua web3js + metamask(chỉ ở client):
+  ```js
+    window.ethereum.request({ method: "eth_requestAccounts" });
+    web3 = new Web3(window.ethereum);
+  ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+  - tạo web3 provider thông qua http provider(có thể ở ssr):
+  ```js
+    const provider = new Web3.providers.HttpProvider(
+    "https://rinkeby.infura.io/v3/443ec6c3dca9484196d8eb95ddc99dbc"
+    );
+    web3 = new Web3(provider);
+  ```
+  => dùng web3 + Ethereum provider(truffle/hdwallet-provider) để deploy
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+B4: Web3 sẽ tương tác với contract từ UI thông qua ABI mà contract expose từ bytecode
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
-## Learn More
+*II. Q&A*
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+What are the requirements for deploying a smart contract on the Ethereum network?
+- Bytecode của smart contract
+- Có một account address trên Ethereum và một lượng ether đủ để deploy smart contract
+- Địa chỉ ví để tạo transaction
+- Một tool để tạo transaction và tương tác với ví: web3 + provider
